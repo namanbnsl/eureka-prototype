@@ -1,5 +1,6 @@
 import { streamText, UIMessage, convertToModelMessages } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { SYSTEM_PROMPT } from "@/prompt";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -12,6 +13,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: google(model),
+    system: SYSTEM_PROMPT,
     messages: convertToModelMessages(messages),
   });
 

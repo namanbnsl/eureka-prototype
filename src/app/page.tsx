@@ -55,12 +55,3 @@ export default function Home() {
     </div>
   );
 }
-
-function Feature({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-xl border border-zinc-200/70 p-5 dark:border-zinc-800/70">
-      <h3 className="text-sm font-medium mb-1.5">{title}</h3>
-      <p className="text-sm text-zinc-600 dark:text-zinc-300">{body}</p>
-    </div>
-  );
-}

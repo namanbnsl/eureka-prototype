@@ -4,11 +4,9 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Message, MessageAvatar, MessageContent } from "@/components/message";
+import { Message, MessageContent } from "@/components/message";
 import {
   PromptInput,
-  PromptInputButton,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
@@ -17,7 +15,6 @@ import {
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/response";
 import { Conversation, ConversationContent } from "@/components/conversation";
-import { GlobeIcon, MicIcon } from "lucide-react";
 
 type Msg = {
   id: string;
@@ -27,7 +24,6 @@ type Msg = {
 
 export default function ChatPage() {
   const [input, setInput] = useState("");
-  const viewportRef = useRef<HTMLDivElement | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,7 +66,9 @@ export default function ChatPage() {
         </div>
       </header>
       {/* Chat area */}
-      <div className="mx-auto w-full max-w-3xl flex-1 px-4 md:px-6 flex flex-col">
+      <div
+        className={`mx-auto w-full max-w-3xl flex-1 px-4 md:px-6 flex flex-col`}
+      >
         <Conversation>
           <ConversationContent>
             {messages.map((message) => (
@@ -104,15 +102,7 @@ export default function ChatPage() {
               value={input}
             />
             <PromptInputToolbar>
-              <PromptInputTools>
-                <PromptInputButton>
-                  <MicIcon size={16} />
-                </PromptInputButton>
-                <PromptInputButton>
-                  <GlobeIcon size={16} />
-                  <span>Search</span>
-                </PromptInputButton>
-              </PromptInputTools>
+              <PromptInputTools></PromptInputTools>
               <PromptInputSubmit disabled={!input} status={status} />
             </PromptInputToolbar>
           </PromptInput>
