@@ -8,10 +8,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Message, MessageAvatar, MessageContent } from "@/components/message";
 import {
   PromptInput,
+  PromptInputButton,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputToolbar,
+  PromptInputTools,
 } from "@/components/prompt-input";
+import { useChat } from "@ai-sdk/react";
+import { Response } from "@/components/response";
+import { Conversation, ConversationContent } from "@/components/conversation";
+import { GlobeIcon, MicIcon } from "lucide-react";
 
 type Msg = {
   id: string;
@@ -20,53 +26,23 @@ type Msg = {
 };
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Msg[]>([
-    {
-      id: "m1",
-      role: "assistant",
-      content: "Welcome to brain.open(). What would you like to learn today?",
-    },
-    {
-      id: "m2",
-      role: "user",
-      content: "Help me grok calculus intuitively.",
-    },
-    {
-      id: "m3",
-      role: "assistant",
-      content:
-        "Beautiful. Let's start with change—rates and accumulation. When you think of a curve, what might its slope tell you about motion?",
-    },
-  ]);
   const [input, setInput] = useState("");
   const viewportRef = useRef<HTMLDivElement | null>(null);
 
-  function onSend() {
-    if (!input.trim()) return;
-    const next: Msg = {
-      id: Math.random().toString(36).slice(2),
-      role: "user",
-      content: input.trim(),
-    };
-    setMessages((m) => [...m, next]);
-    setInput("");
-    // Placeholder: in real app, call your API and stream the assistant reply.
-    setTimeout(() => {
-      setMessages((m) => [
-        ...m,
-        {
-          id: Math.random().toString(36).slice(2),
-          role: "assistant",
-          content:
-            "Noted. I'll ask guiding questions to build intuition step by step.",
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    sendMessage(
+      { text: input },
+      {
+        body: {
+          model: "gemini-2.5-flash",
         },
-      ]);
-      viewportRef.current?.scrollTo({
-        top: viewportRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }, 400);
-  }
+      }
+    );
+    setInput("");
+  };
+
+  const { messages, status, sendMessage } = useChat();
 
   return (
     <div className="relative flex flex-col h-svh">
@@ -95,36 +71,49 @@ export default function ChatPage() {
       </header>
       {/* Chat area */}
       <div className="mx-auto w-full max-w-3xl flex-1 px-4 md:px-6 flex flex-col">
-        <ScrollArea className="flex-1">
-          <div ref={viewportRef} className="w-full py-8 flex flex-col gap-6">
-            {messages.map((m) => (
-              <Message from={m.role} key={m.id}>
-                <MessageContent>{m.content}</MessageContent>
-                <MessageAvatar
-                  className="mx-3"
-                  src=""
-                  name={m.role == "user" ? "ME" : "AI"}
-                />
+        <Conversation>
+          <ConversationContent>
+            {messages.map((message) => (
+              <Message from={message.role} key={message.id}>
+                <MessageContent>
+                  {message.parts.map((part, i) => {
+                    switch (part.type) {
+                      case "text":
+                        return (
+                          <Response key={`${message.id}-${i}`}>
+                            {part.text}
+                          </Response>
+                        );
+                      default:
+                        return null;
+                    }
+                  })}
+                </MessageContent>
               </Message>
             ))}
-          </div>
-        </ScrollArea>
+          </ConversationContent>
+        </Conversation>
+
         <Separator />
+
         {/* Composer */}
         <div className="w-full py-4">
-          <PromptInput onSubmit={() => {}} className="mt-4 relative">
+          <PromptInput onSubmit={handleSubmit} className="mt-4">
             <PromptInputTextarea
-              onChange={(e) => {
-                setInput(e.target.value);
-              }}
+              onChange={(e) => setInput(e.target.value)}
               value={input}
             />
             <PromptInputToolbar>
-              <PromptInputSubmit
-                className="absolute right-1 bottom-1"
-                disabled={false}
-                status={"ready"}
-              />
+              <PromptInputTools>
+                <PromptInputButton>
+                  <MicIcon size={16} />
+                </PromptInputButton>
+                <PromptInputButton>
+                  <GlobeIcon size={16} />
+                  <span>Search</span>
+                </PromptInputButton>
+              </PromptInputTools>
+              <PromptInputSubmit disabled={!input} status={status} />
             </PromptInputToolbar>
           </PromptInput>
         </div>
@@ -132,23 +121,3 @@ export default function ChatPage() {
     </div>
   );
 }
-
-// function ChatMessage({ role, content }: { role: "user" | "assistant"; content: string }) {
-//   const isUser = role === "user";
-//   return (
-//     <div className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}>
-//       {!isUser && <Avatar alt="AI" fallback="AI" className="mt-1" />}
-//       <div
-//         className={cn(
-//           "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
-//           isUser
-//             ? "bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900"
-//             : "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-//         )}
-//       >
-//         {content}
-//       </div>
-//       {isUser && <Avatar alt="You" fallback="You" className="mt-1" />}
-//     </div>
-//   );
-// }
