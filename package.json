@@ -6,7 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "lint:fix": "next lint --fix",
+    "preview": "next build && next start",
+    "check": "next lint && tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.11",
@@ -38,5 +44,6 @@
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.7",
     "typescript": "^5"
-  }
+  },
+  "packageManager": "pnpm@10.13.1"
 }
