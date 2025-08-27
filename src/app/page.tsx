@@ -10,7 +10,7 @@ export default function Home() {
 
       <header className="flex items-center justify-between px-6 md:px-10 py-6">
         <Link href="/" className="font-mono text-sm md:text-base text-zinc-500 hover:text-foreground transition-colors">
-          <span className="rounded-md border border-zinc-200/60 dark:border-zinc-800/60 px-2 py-1">brain.open()</span>
+          <span className="rounded-md border b\order-zinc-200/60 dark:border-zinc-800/60 px-2 py-1">brain.open()</span>
         </Link>
         <nav className="flex items-center gap-2">
           <Link href="/chat">
@@ -19,7 +19,7 @@ export default function Home() {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 md:px-10 pt-10 md:pt-20 pb-24">
+      <main className="flex flex-col items-center justify-center mx-auto max-w-8xl px-6 md:px-10 min-h-[70vh]">
         <div className="flex flex-col items-center text-center gap-8">
           <p className="font-mono text-xs tracking-widest text-zinc-500">
             THE FUTURE OF EDUCATION WITH AI
@@ -31,7 +31,7 @@ export default function Home() {
             </span>
           </h1>
           <p className="max-w-2xl text-zinc-600 dark:text-zinc-300">
-            An AI‑native learning OS: minimal, calm, and personal. Ask. Explore. Master.
+            An AI‑native learning OS: minimal, calm, and personal. <br />Ask. Explore. Master.
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <Link href="/chat">
@@ -42,17 +42,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-
-        <section id="about" className="mt-24 grid gap-6 md:grid-cols-3">
-          <Feature title="Socratic chat" body="Guided questions that lead you to insight, not just answers." />
-          <Feature title="Memory that matters" body="Your progress and preferences persist, shaping future help." />
-          <Feature title="Calm design" body="A focused interface so you can stay in flow while learning." />
-        </section>
       </main>
-
-      <footer className="px-6 md:px-10 py-8 text-center text-xs text-zinc-500">
-        © {new Date().getFullYear()} brain.open()
-      </footer>
     </div>
   );
 }
