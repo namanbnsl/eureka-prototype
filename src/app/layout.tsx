@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistMono.className} antialiased min-h-screen bg-[var(--background)] text-[var(--foreground)]`}
+        className={`${geistMono.className} antialiased min-h-screen text-[var(--foreground)]`}
       >
         {children}
       </body>

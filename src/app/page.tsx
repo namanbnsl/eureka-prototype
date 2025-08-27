@@ -5,12 +5,17 @@ export default function Home() {
   return (
     <div className="relative min-h-screen">
       {/* Subtle grid background */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(120,120,255,0.08),transparent_50%),radial-gradient(ellipse_at_bottom,rgba(120,255,200,0.06),transparent_50%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,transparent,transparent_60%,rgba(0,0,0,0.04)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 -z-10" />
+      <div className="pointer-events-none absolute inset-0 -z-10 " />
 
       <header className="flex items-center justify-between px-6 md:px-10 py-6">
-        <Link href="/" className="font-mono text-sm md:text-base text-zinc-500 hover:text-foreground transition-colors">
-          <span className="rounded-md border b\order-zinc-200/60 dark:border-zinc-800/60 px-2 py-1">brain.open()</span>
+        <Link
+          href="/"
+          className="font-mono text-sm md:text-base text-zinc-500 hover:text-foreground transition-colors"
+        >
+          <span className="rounded-md border b\order-zinc-200/60 dark:border-zinc-800/60 px-2 py-1">
+            brain.open()
+          </span>
         </Link>
         <nav className="flex items-center gap-2">
           <Link href="/chat">
@@ -31,13 +36,17 @@ export default function Home() {
             </span>
           </h1>
           <p className="max-w-2xl text-zinc-600 dark:text-zinc-300">
-            An AI‑native learning OS: minimal, calm, and personal. <br />Ask. Explore. Master.
+            An AI‑native learning OS: minimal, calm, and personal. <br />
+            Ask. Explore. Master.
           </p>
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <Link href="/chat">
               <Button size="lg">Start chatting</Button>
             </Link>
-            <Link href="#about" className="text-sm text-zinc-600 hover:text-foreground transition-colors">
+            <Link
+              href="#about"
+              className="text-sm text-zinc-600 hover:text-foreground transition-colors"
+            >
               Learn more →
             </Link>
           </div>
