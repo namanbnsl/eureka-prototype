@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Message, MessageContent } from "@/components/message";
+import { Message, MessageAvatar, MessageContent } from "@/components/message";
 import {
   PromptInput,
   PromptInputSubmit,
@@ -15,12 +15,6 @@ import {
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/response";
 import { Conversation, ConversationContent } from "@/components/conversation";
-
-type Msg = {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-};
 
 export default function ChatPage() {
   const [input, setInput] = useState("");
@@ -67,7 +61,7 @@ export default function ChatPage() {
       </header>
       {/* Chat area */}
       <div
-        className={`mx-auto w-full max-w-3xl flex-1 px-4 md:px-6 flex flex-col`}
+        className={`mx-auto w-full max-w-7xl flex-1 px-4 md:px-6 flex flex-col`}
       >
         <Conversation>
           <ConversationContent>
@@ -78,7 +72,39 @@ export default function ChatPage() {
                     switch (part.type) {
                       case "text":
                         return (
-                          <Response key={`${message.id}-${i}`}>
+                          <Response
+                            key={`${message.id}-${i}`}
+                            className={`
+        max-w-none text-base leading-relaxed break-words ${
+          message.role == "assistant" ? "p-4" : ""
+        } rounded-lg 
+        
+        /* Direct element styling */
+        [&>h1]:mt-6 [&>h1]:mb-4 [&>h1]:font-bold [&>h1]:text-xl
+        [&>h2]:mt-5 [&>h2]:mb-3 [&>h2]:font-bold [&>h2]:text-lg
+        [&>h3]:mt-4 [&>h3]:mb-2 [&>h3]:font-semibold [&>h3]:text-base
+        [&>h4]:mt-3 [&>h4]:mb-2 [&>h4]:font-medium
+        
+        [&>p]:my-3 [&>p]:leading-relaxed
+        
+        [&>ul]:my-3 [&>ul]:pl-6 [&>ul]:list-disc [&>ul]:space-y-1
+        [&>ol]:my-3 [&>ol]:pl-6 [&>ol]:list-decimal [&>ol]:space-y-1
+        [&_li]:leading-relaxed
+        
+        [&>pre]:my-4 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto
+        [&>pre]:bg-zinc-800 [&>pre]:text-zinc-100
+        
+        [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm
+        [&_code]:bg-zinc-200 dark:[&_code]:bg-zinc-700
+        
+        [&>blockquote]:my-4 [&>blockquote]:pl-4 [&>blockquote]:border-l-4
+        [&>blockquote]:border-zinc-300 dark:[&>blockquote]:border-zinc-600
+        [&>blockquote]:italic [&>blockquote]:text-zinc-600 dark:[&>blockquote]:text-zinc-400
+        
+        [&_.math-display]:my-4 [&_.math-display]:text-center
+        [&_.math-inline]:mx-1
+      `}
+                          >
                             {part.text}
                           </Response>
                         );
@@ -87,6 +113,10 @@ export default function ChatPage() {
                     }
                   })}
                 </MessageContent>
+                <MessageAvatar
+                  src=""
+                  name={message.role == "assistant" ? "AI" : "ME"}
+                />
               </Message>
             ))}
           </ConversationContent>
