@@ -195,14 +195,16 @@ function formatExecutePythonOutput(output: unknown): string {
   const error = o.error as unknown;
   const results = o.results as unknown;
   const logs = o.logs as unknown;
+  // Narrow `logs` (unknown) into a typed shape and avoid using `any`
+  const logsObj =
+    logs && typeof logs === "object"
+      ? (logs as { stdout?: unknown[]; stderr?: unknown[] })
+      : undefined;
+
   const stdoutArr =
-    logs && typeof logs === "object" && Array.isArray((logs as any).stdout)
-      ? ((logs as any).stdout as unknown[])
-      : undefined;
+    logsObj && Array.isArray(logsObj.stdout) ? logsObj.stdout : undefined;
   const stderrArr =
-    logs && typeof logs === "object" && Array.isArray((logs as any).stderr)
-      ? ((logs as any).stderr as unknown[])
-      : undefined;
+    logsObj && Array.isArray(logsObj.stderr) ? logsObj.stderr : undefined;
   const stdoutText = stdoutArr
     ?.map((x) => String(x))
     .join("")
