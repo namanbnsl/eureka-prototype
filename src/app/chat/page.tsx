@@ -15,6 +15,14 @@ import {
 import { useChat } from "@ai-sdk/react";
 import { Response } from "@/components/response";
 import { Conversation, ConversationContent } from "@/components/conversation";
+import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@/components/tool";
+import type { ToolUIPart } from "ai";
 
 export default function ChatPage() {
   const [input, setInput] = useState("");
@@ -108,6 +116,34 @@ export default function ChatPage() {
                             {part.text}
                           </Response>
                         );
+                      case "tool-execute_python": {
+                        type ExecutePythonUIPart = ToolUIPart<{
+                          execute_python: {
+                            input: { code: string };
+                            output: unknown;
+                          };
+                        }>;
+                        const toolPart = part as unknown as ExecutePythonUIPart;
+                        return (
+                          <Tool key={`${message.id}-${i}`} defaultOpen={true}>
+                            <ToolHeader
+                              type={toolPart.type}
+                              state={toolPart.state}
+                            />
+                            <ToolContent>
+                              <ToolInput input={toolPart.input} />
+                              <ToolOutput
+                                output={
+                                  <Response>
+                                    {formatExecutePythonOutput(toolPart.output)}
+                                  </Response>
+                                }
+                                errorText={toolPart.errorText}
+                              />
+                            </ToolContent>
+                          </Tool>
+                        );
+                      }
                       default:
                         return null;
                     }
@@ -140,4 +176,94 @@ export default function ChatPage() {
       </div>
     </div>
   );
+}
+
+function formatExecutePythonOutput(output: unknown): string {
+  if (output === undefined || output === null) {
+    return "No output.";
+  }
+
+  // If the tool returned a simple string, show it directly
+  if (typeof output === "string") {
+    return output;
+  }
+
+  // If the tool returned a structured payload from e2b
+  // Expected shape: { text?: string; results?: unknown; logs?: unknown; error?: unknown }
+  const o = output as Record<string, unknown>;
+  const text = typeof o.text === "string" ? o.text : undefined;
+  const error = o.error as unknown;
+  const results = o.results as unknown;
+  const logs = o.logs as unknown;
+  const stdoutArr =
+    logs && typeof logs === "object" && Array.isArray((logs as any).stdout)
+      ? ((logs as any).stdout as unknown[])
+      : undefined;
+  const stderrArr =
+    logs && typeof logs === "object" && Array.isArray((logs as any).stderr)
+      ? ((logs as any).stderr as unknown[])
+      : undefined;
+  const stdoutText = stdoutArr
+    ?.map((x) => String(x))
+    .join("")
+    ?.trim();
+  const stderrText = stderrArr
+    ?.map((x) => String(x))
+    .join("")
+    ?.trim();
+
+  // Show error prominently if present
+  if (error) {
+    try {
+      return `Error:\n\n\`\`\`\n${
+        typeof error === "string" ? error : JSON.stringify(error, null, 2)
+      }\n\`\`\``;
+    } catch {
+      return `Error: ${String(error)}`;
+    }
+  }
+
+  // Prefer stdout text if available
+  if (text && text.trim().length > 0) {
+    return text;
+  }
+  if (stdoutText && stdoutText.length > 0) {
+    return stdoutText;
+  }
+
+  // Otherwise, show results and logs if present
+  const sections: string[] = [];
+  const hasNonEmptyResults = (() => {
+    if (results === undefined || results === null) return false;
+    if (Array.isArray(results)) return results.length > 0;
+    if (typeof results === "object")
+      return Object.keys(results as object).length > 0;
+    return true;
+  })();
+  if (hasNonEmptyResults) {
+    try {
+      sections.push(
+        "Results:\n\n" +
+          "```json\n" +
+          JSON.stringify(results, null, 2) +
+          "\n```"
+      );
+    } catch {
+      sections.push("Results:\n\n" + String(results));
+    }
+  }
+  if (stderrText && stderrText.length > 0) {
+    sections.push("Stderr:\n\n" + "```\n" + stderrText + "\n```");
+  }
+
+  if (sections.length > 0) {
+    return sections.join("\n\n");
+  }
+
+  // Fallback to showing the whole object
+  try {
+    return "```json\n" + JSON.stringify(output, null, 2) + "\n```";
+  } catch {
+    return String(output);
+  }
 }
