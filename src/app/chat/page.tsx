@@ -144,6 +144,45 @@ export default function ChatPage() {
                           </Tool>
                         );
                       }
+                      case "tool-create_video": {
+                        type CreateVideoUIPart = ToolUIPart<{
+                          create_video: {
+                            input: { prompt: string };
+                            output: { videoUrl?: string; error?: string };
+                          };
+                        }>;
+
+                        const toolPart = part as unknown as CreateVideoUIPart;
+                        const output = toolPart.output;
+
+                        return (
+                          <Tool key={`${message.id}-${i}`} defaultOpen={true}>
+                            <ToolHeader
+                              type={toolPart.type}
+                              state={toolPart.state}
+                            />
+                            <ToolContent>
+                              <ToolInput input={toolPart.input} />
+                              <ToolOutput
+                                output={
+                                  output.videoUrl ? (
+                                    <video
+                                      src={output.videoUrl}
+                                      controls
+                                      className="w-full rounded-lg"
+                                    />
+                                  ) : (
+                                    <Response>
+                                      {output.error || "An unknown error occurred."}
+                                    </Response>
+                                  )
+                                }
+                                errorText={toolPart.errorText}
+                              />
+                            </ToolContent>
+                          </Tool>
+                        );
+                      }
                       default:
                         return null;
                     }

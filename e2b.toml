@@ -1,0 +1,15 @@
+# e2b.toml
+
+id = "manim-sandbox"
+
+[env.apt]
+packages = [
+  "ffmpeg",
+  "texlive-full",
+  "libpango1.0-dev"
+]
+
+[env.pip]
+packages = [
+  "manim"
+]
