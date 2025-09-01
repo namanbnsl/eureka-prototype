@@ -1,4 +1,10 @@
-import { streamText, UIMessage, convertToModelMessages, tool } from "ai";
+import {
+  streamText,
+  UIMessage,
+  convertToModelMessages,
+  tool,
+  stepCountIs,
+} from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { SYSTEM_PROMPT } from "@/prompt";
 import { z } from "zod";
@@ -35,7 +41,10 @@ export async function POST(req: Request) {
         },
       }),
     },
+    stopWhen: stepCountIs(5),
   });
 
-  return result.toUIMessageStreamResponse();
+  return result.toUIMessageStreamResponse({
+    sendReasoning: true,
+  });
 }
