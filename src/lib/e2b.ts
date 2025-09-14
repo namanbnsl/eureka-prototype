@@ -1,8 +1,4 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-import { writeFile } from "fs/promises";
-
-const execAsync = promisify(exec);
+import { Sandbox } from "@e2b/code-interpreter";
 
 export interface RenderRequest {
   script: string;
@@ -13,43 +9,60 @@ export async function renderManimVideo({
   script,
   prompt,
 }: RenderRequest): Promise<string> {
+  let sandbox: Sandbox | null = null;
+
   try {
-    // Write the script to a temporary file
-    const { promises: fs } = require("fs");
-    const scriptPath = `/tmp/manim_script_${Date.now()}.py`;
-    await fs.writeFile(scriptPath, script, "utf8");
+    // Create sandbox with extended timeout
+    sandbox = await Sandbox.create("manim-sandbox-eureka-prototype", {
+      timeoutMs: 300000, // 5 minutes
+    });
+    console.log("E2B sandbox created successfully");
 
-    // Execute manim command to render the video
-    const { stdout, stderr } = await execAsync(
-      `manim ${scriptPath} MyScene -pql --media_dir /tmp/media_${Date.now()}`,
-      { timeout: 60000 } // 60 second timeout
+    // Define paths
+    const scriptPath = `/home/script.py`;
+    const mediaDir = `/home/media`;
+    const outputDir = `${mediaDir}/videos/MyScene/480p15`;
+
+    // Write the Manim script
+    await sandbox.files.write(scriptPath, script);
+    console.log("Manim script written to sandbox");
+
+    // Run manim directly as a command
+    const proc = await sandbox.commands.run(
+      `manim ${scriptPath} MyScene --media_dir ${mediaDir} -ql --disable_caching`
     );
+    console.log("Manim process finished:", proc);
 
-    console.log("Manim stdout:", stdout);
-    if (stderr) console.log("Manim stderr:", stderr);
-
-    // Try to find the generated video file
-    // For now, we'll create a placeholder for testing
-    const tempPath = `/tmp/demo_video_${Date.now()}.mp4`;
-
-    // Create a simple placeholder video file using ffmpeg if available
-    // This is a fallback until we set up the full E2B pipeline
-    try {
-      await execAsync(
-        `ffmpeg -f lavfi -i testsrc=duration=3:size=320x240:rate=1 -vf "drawtext=text='Demo Video':fontsize=30:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2" -c:v libx264 ${tempPath}`,
-        { timeout: 10000 }
+    // Verify success
+    if (proc.exitCode !== 0) {
+      throw new Error(
+        `Manim failed with exit code ${proc.exitCode}\n${proc.stderr}`
       );
-    } catch (ffmpegError) {
-      // If ffmpeg fails, create an empty file as placeholder
-      await fs.writeFile(tempPath, "");
-      console.log("Created placeholder video file for testing");
     }
 
-    return tempPath;
-  } catch (error) {
-    console.error("Manim rendering error:", error);
-    throw new Error(
-      `Failed to render Manim video: ${(error as Error).message}`
-    );
+    // List output directory
+    const files = await sandbox.files.list(outputDir);
+    console.log("Files in output directory:", files);
+
+    const videoFiles = files.filter((file: any) => file.name.endsWith(".mp4"));
+    if (videoFiles.length === 0) {
+      throw new Error("No video file was generated");
+    }
+
+    const videoFile = videoFiles[0];
+    const videoPath = `${outputDir}/${videoFile.name}`;
+    console.log("Video file found:", videoPath);
+
+    // Read file content
+    const videoData = await sandbox.files.read(videoPath);
+
+    // Convert to base64 for frontend
+    const base64Data = Buffer.from(videoData).toString("base64");
+    return `data:video/mp4;base64,${base64Data}`;
+  } catch (error: any) {
+    console.error("E2B sandbox rendering error:", error);
+    throw new Error(`Failed to render Manim video: ${error.message}`);
+  } finally {
+    console.log("E2B sandbox will be closed by the framework");
   }
 }

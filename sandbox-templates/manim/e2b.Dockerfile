@@ -1,0 +1,1 @@
+FROM manimcommunity/manim:stable
