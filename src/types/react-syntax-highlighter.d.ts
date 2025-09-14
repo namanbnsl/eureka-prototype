@@ -11,7 +11,7 @@ declare module "react-syntax-highlighter" {
     style?: unknown;
     [key: string]: unknown;
   }
-  
+
   export const Prism: React.ComponentType<PrismProps>;
 }
 
