@@ -28,6 +28,7 @@ Requirements:
 - Create a single, meaningful animation
 - Ensure syntax is valid Python
 - Use Manim's best practices for smooth animations
+- ALWAYS USE THE NAME "MyScene" for all scenes just like the example. DO NOT CHANGE IT.
 
 Example structure:
 from manim import *

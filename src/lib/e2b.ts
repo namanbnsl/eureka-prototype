@@ -19,9 +19,9 @@ export async function renderManimVideo({
     console.log("E2B sandbox created successfully");
 
     // Define paths
-    const scriptPath = `/home/script.py`;
-    const mediaDir = `/home/media`;
-    const outputDir = `${mediaDir}/videos/MyScene/480p15`;
+    const scriptPath = `/home/user/script.py`;
+    const mediaDir = `/home/user/media`;
+    const outputDir = `${mediaDir}/videos/script/480p15`;
 
     // Write the Manim script
     await sandbox.files.write(scriptPath, script);
@@ -29,10 +29,17 @@ export async function renderManimVideo({
 
     // Run manim directly as a command
     const proc = await sandbox.commands.run(
-      `manim ${scriptPath} MyScene --media_dir ${mediaDir} -ql --disable_caching`
+      `manim ${scriptPath} MyScene --media_dir ${mediaDir} -ql --disable_caching`,
+      {
+        onStdout: (data) => {
+          console.log(data);
+        },
+        onStderr: (data) => {
+          console.log(data);
+        },
+      }
     );
     console.log("Manim process finished:", proc);
-
     // Verify success
     if (proc.exitCode !== 0) {
       throw new Error(
