@@ -148,6 +148,22 @@ export default function ChatPage() {
                       case "tool-generate_video": {
                         const result = part.result;
                         if (result) {
+                          // Check if this tool invocation has a completed video
+                          const videoUrl = result.videoUrl;
+                          if (videoUrl) {
+                            return (
+                              <div key={`${message.id}-${i}`} className="p-4">
+                                <div className="mb-4">
+                                  <h3 className="text-lg font-semibold mb-2">
+                                    Generated Video
+                                  </h3>
+                                  <VideoPlayer src={videoUrl} />
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          // Still generating
                           return (
                             <div key={`${message.id}-${i}`} className="p-4">
                               <div className="flex items-center space-x-2 mb-4">
@@ -156,7 +172,9 @@ export default function ChatPage() {
                                   {result.message}
                                 </span>
                               </div>
-                              {/* Video player will be added here when generation completes */}
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Generation may take a few minutes...
+                              </p>
                             </div>
                           );
                         }
