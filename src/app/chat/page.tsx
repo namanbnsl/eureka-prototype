@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -23,6 +23,7 @@ import {
   ToolOutput,
 } from "@/components/tool";
 import type { ToolUIPart } from "ai";
+import { VideoPlayer } from "@/components/video-player";
 
 export default function ChatPage() {
   const [input, setInput] = useState("");
@@ -73,10 +74,10 @@ export default function ChatPage() {
       >
         <Conversation>
           <ConversationContent>
-            {messages.map((message) => (
+            {messages.map((message: any) => (
               <Message from={message.role} key={message.id}>
                 <MessageContent>
-                  {message.parts.map((part, i) => {
+                  {message.parts?.map((part: any, i: number) => {
                     switch (part.type) {
                       case "text":
                         return (
@@ -85,30 +86,30 @@ export default function ChatPage() {
                             className={`
         max-w-none text-base leading-relaxed break-words ${
           message.role == "assistant" ? "p-4" : ""
-        } rounded-lg 
-        
+        } rounded-lg
+
         /* Direct element styling */
         [&>h1]:mt-6 [&>h1]:mb-4 [&>h1]:font-bold [&>h1]:text-xl
         [&>h2]:mt-5 [&>h2]:mb-3 [&>h2]:font-bold [&>h2]:text-lg
         [&>h3]:mt-4 [&>h3]:mb-2 [&>h3]:font-semibold [&>h3]:text-base
         [&>h4]:mt-3 [&>h4]:mb-2 [&>h4]:font-medium
-        
+
         [&>p]:my-3 [&>p]:leading-relaxed
-        
+
         [&>ul]:my-3 [&>ul]:pl-6 [&>ul]:list-disc [&>ul]:space-y-1
         [&>ol]:my-3 [&>ol]:pl-6 [&>ol]:list-decimal [&>ol]:space-y-1
         [&_li]:leading-relaxed
-        
+
         [&>pre]:my-4 [&>pre]:p-4 [&>pre]:rounded-lg [&>pre]:overflow-x-auto
         [&>pre]:bg-zinc-800 [&>pre]:text-zinc-100
-        
+
         [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm
         [&_code]:bg-zinc-200 dark:[&_code]:bg-zinc-700
-        
+
         [&>blockquote]:my-4 [&>blockquote]:pl-4 [&>blockquote]:border-l-4
         [&>blockquote]:border-zinc-300 dark:[&>blockquote]:border-zinc-600
         [&>blockquote]:italic [&>blockquote]:text-zinc-600 dark:[&>blockquote]:text-zinc-400
-        
+
         [&_.math-display]:my-4 [&_.math-display]:text-center
         [&_.math-inline]:mx-1
       `}
@@ -143,6 +144,23 @@ export default function ChatPage() {
                             </ToolContent>
                           </Tool>
                         );
+                      }
+                      case "tool-generate_video": {
+                        const result = part.result;
+                        if (result) {
+                          return (
+                            <div key={`${message.id}-${i}`} className="p-4">
+                              <div className="flex items-center space-x-2 mb-4">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                                <span className="text-lg">
+                                  {result.message}
+                                </span>
+                              </div>
+                              {/* Video player will be added here when generation completes */}
+                            </div>
+                          );
+                        }
+                        return null;
                       }
                       default:
                         return null;
