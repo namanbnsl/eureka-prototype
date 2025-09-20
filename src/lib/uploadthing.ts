@@ -76,8 +76,8 @@
 //     throw new Error(`Video upload failed: ${(error as Error).message}`);
 //   }
 // }
-import { UTApi } from "uploadthing/server";
-import { writeFile, unlink, readFile } from "fs/promises";
+import { UTApi, UTFile } from "uploadthing/server";
+import { unlink, readFile } from "fs/promises";
 
 const utapi = new UTApi();
 
@@ -93,30 +93,54 @@ export async function uploadVideo({
   try {
     console.log(`Uploading video from path: ${videoPath}`);
 
-    let tempFilePath: string;
-    let shouldDeleteFile = false;
-
     // Check if videoPath is a base64 data URL
     if (videoPath.startsWith("data:video/mp4;base64,")) {
-      // Convert base64 to file
+      // Convert base64 to binary data preserving the exact bytes
       const base64Data = videoPath.replace("data:video/mp4;base64,", "");
       const buffer = Buffer.from(base64Data, "base64");
-      tempFilePath = `/tmp/upload_video_${Date.now()}.mp4`;
-      await writeFile(tempFilePath, buffer);
-      shouldDeleteFile = true;
-      console.log("Converted base64 to temporary file for upload");
-    } else {
-      // Use the provided file path
-      tempFilePath = videoPath;
-      shouldDeleteFile = false; // Don't delete user-provided files
+      console.log(`Decoded base64 data: ${buffer.length} bytes`);
+
+      // Create File object directly from buffer to preserve binary integrity
+      const fileName = `manim_video_${Date.now()}.mp4`;
+      const file = new UTFile([new Uint8Array(buffer)], fileName, {
+        type: "video/mp4",
+      });
+
+      // Upload to UploadThing directly without saving to temp file
+      console.log("Starting upload to UploadThing...");
+      const response = await utapi.uploadFiles([file]);
+
+      // Check if upload was successful
+      if (!response || response.length === 0) {
+        throw new Error("No response from UploadThing");
+      }
+
+      const uploadResult = response[0];
+      if (uploadResult.error) {
+        throw new Error(`Upload failed: ${uploadResult.error.message}`);
+      }
+
+      if (!uploadResult.data) {
+        throw new Error("Upload succeeded but no data returned");
+      }
+
+      const uploadUrl = uploadResult.data.url;
+      console.log(`Video uploaded successfully: ${uploadUrl}`);
+      return uploadUrl;
     }
+
+    // Use the provided file path for non-base64 paths
+    const tempFilePath = videoPath;
+    // If the renderer saved into a temp location, make sure we clean it up post-upload
+    const shouldDeleteFile = tempFilePath.startsWith("/tmp/");
 
     // Read the file as buffer
     const fileBuffer = await readFile(tempFilePath);
+    console.log(`Read file from path with size: ${fileBuffer.length} bytes`);
 
     // Create File object with proper name - convert Buffer to Uint8Array
     const fileName = `manim_video_${userId}_${Date.now()}.mp4`;
-    const file = new File([new Uint8Array(fileBuffer)], fileName, {
+    const file = new UTFile([new Uint8Array(fileBuffer)], fileName, {
       type: "video/mp4",
     });
 
@@ -155,16 +179,13 @@ export async function uploadVideo({
   } catch (error) {
     console.error("Upload failed:", error);
 
-    // Clean up temporary file if it was created from base64
-    if (videoPath.startsWith("data:video/mp4;base64,")) {
-      const tempFilePath = `/tmp/upload_video_${Date.now()}.mp4`;
+    // Best-effort cleanup for temp files created by renderer
+    if (videoPath && typeof videoPath === "string" && videoPath.startsWith("/tmp/")) {
       try {
-        await unlink(tempFilePath);
+        await unlink(videoPath);
+        console.log("Cleaned up temporary file after error");
       } catch (cleanupError) {
-        console.error(
-          "Failed to clean up temporary file after error:",
-          cleanupError
-        );
+        console.error("Failed to clean up temporary file after error:", cleanupError);
       }
     }
 

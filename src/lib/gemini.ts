@@ -23,6 +23,9 @@ You are a Manim animation expert. Generate Python code for a Manim Community v0.
 
 Requirements:
 - Return ONLY the complete Python code, nothing else
+- DO NOT DO 3D things for now.
+- KEEP THE CODE SIMPLE.
+- USE SIMPLE COLORS. NO NEED TO USE COMPLEX COLORS.
 - Use manim's Scene class and construct()
 - Include all necessary imports
 - Create a single, meaningful animation
