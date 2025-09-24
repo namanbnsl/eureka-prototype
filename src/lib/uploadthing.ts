@@ -78,6 +78,7 @@
 // }
 import { UTApi, UTFile } from "uploadthing/server";
 import { unlink, readFile } from "fs/promises";
+import path from "path";
 
 const utapi = new UTApi();
 
@@ -132,11 +133,16 @@ export async function uploadVideo({
     // Use the provided file path for non-base64 paths
     const tempFilePath = videoPath;
     // If the renderer saved into a temp location, make sure we clean it up post-upload
-    const shouldDeleteFile = tempFilePath.startsWith("/tmp/");
+    const projectTmpDir = path.join(process.cwd(), "tmp") + path.sep;
+    const shouldDeleteFile =
+      tempFilePath.startsWith("/tmp/") || tempFilePath.startsWith(projectTmpDir);
 
     // Read the file as buffer
     const fileBuffer = await readFile(tempFilePath);
     console.log(`Read file from path with size: ${fileBuffer.length} bytes`);
+    if (fileBuffer.length === 0) {
+      throw new Error("Attempted to upload empty file; aborting");
+    }
 
     // Create File object with proper name - convert Buffer to Uint8Array
     const fileName = `manim_video_${userId}_${Date.now()}.mp4`;
@@ -180,12 +186,21 @@ export async function uploadVideo({
     console.error("Upload failed:", error);
 
     // Best-effort cleanup for temp files created by renderer
-    if (videoPath && typeof videoPath === "string" && videoPath.startsWith("/tmp/")) {
+    if (videoPath && typeof videoPath === "string") {
       try {
-        await unlink(videoPath);
-        console.log("Cleaned up temporary file after error");
+        const projectTmpDir = path.join(process.cwd(), "tmp") + path.sep;
+        if (
+          videoPath.startsWith("/tmp/") ||
+          videoPath.startsWith(projectTmpDir)
+        ) {
+          await unlink(videoPath);
+          console.log("Cleaned up temporary file after error");
+        }
       } catch (cleanupError) {
-        console.error("Failed to clean up temporary file after error:", cleanupError);
+        console.error(
+          "Failed to clean up temporary file after error:",
+          cleanupError
+        );
       }
     }
 
