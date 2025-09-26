@@ -47,7 +47,8 @@ export async function uploadVideo({
         throw new Error("Upload succeeded but no data returned");
       }
 
-      const uploadUrl = uploadResult.data.url;
+      const data = uploadResult.data as any;
+      const uploadUrl: string = (data?.ufsUrl as string) ?? (data?.url as string);
       console.log(`Video uploaded successfully: ${uploadUrl}`);
       return uploadUrl;
     }
@@ -90,7 +91,8 @@ export async function uploadVideo({
       throw new Error("Upload succeeded but no data returned");
     }
 
-    const uploadUrl = uploadResult.data.url;
+    const data = uploadResult.data as any;
+    const uploadUrl: string = (data?.ufsUrl as string) ?? (data?.url as string);
     console.log(`Video uploaded successfully: ${uploadUrl}`);
 
     // Clean up the temporary file if we created it

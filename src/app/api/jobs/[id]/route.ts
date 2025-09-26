@@ -1,7 +1,11 @@
 import { jobStore } from "@/lib/job-store";
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
-  const job = jobStore.get(params.id);
+export async function GET(
+  _req: Request,
+  ctx: { params: Promise<{ id: string }> }
+) {
+  const { id } = await ctx.params;
+  const job = jobStore.get(id);
   if (!job) {
     return new Response(JSON.stringify({ error: "Job not found" }), {
       status: 404,
