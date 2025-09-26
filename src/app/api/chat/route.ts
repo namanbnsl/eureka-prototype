@@ -3,7 +3,6 @@ import {
   UIMessage,
   convertToModelMessages,
   tool,
-  stepCountIs,
 } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { SYSTEM_PROMPT } from "@/prompt";

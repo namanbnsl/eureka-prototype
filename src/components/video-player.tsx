@@ -13,7 +13,7 @@ interface VideoPlayerProps {
   src?: string;
 }
 
-export function VideoPlayer({ jobId, status, description, src }: VideoPlayerProps) {
+export function VideoPlayer({ jobId, status, src }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [jobStatus, setJobStatus] = useState<JobStatus>(status ?? (src ? "ready" : "generating"));
   const [videoUrl, setVideoUrl] = useState<string | undefined>(src);
