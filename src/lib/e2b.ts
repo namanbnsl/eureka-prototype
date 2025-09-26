@@ -12,7 +12,7 @@ export async function renderManimVideo({
   let sandbox: Sandbox | null = null;
 
   try {
-    sandbox = await Sandbox.create("eureka-prototype-manim-ffmpeg", {
+    sandbox = await Sandbox.create("eureka-prototype-manim-latex", {
       timeoutMs: 300000,
     });
     console.log("E2B sandbox created successfully");
