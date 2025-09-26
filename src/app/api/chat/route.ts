@@ -10,6 +10,7 @@ import { SYSTEM_PROMPT } from "@/prompt";
 import { z } from "zod";
 import { Sandbox } from "@e2b/code-interpreter";
 import { inngest } from "@/lib/inngest";
+import { jobStore } from "@/lib/job-store";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -55,19 +56,24 @@ export async function POST(req: Request) {
         execute: async ({ description }) => {
           console.log("Starting video generation for:", description);
 
-          // Dispatch background job to Inngest
+          // Create a job in the in-memory job store
+          const job = jobStore.create(description);
+
+          // Dispatch background job to Inngest, including jobId for status updates
           await inngest.send({
             name: "video/generate.request",
             data: {
               prompt: description,
               userId: "anonymous",
               chatId: Date.now().toString(), // Generate a chat ID
+              jobId: job.id,
             },
           });
 
           return {
             status: "generating",
             description,
+            jobId: job.id,
           };
         },
       }),
@@ -78,3 +84,4 @@ export async function POST(req: Request) {
     sendReasoning: true,
   });
 }
+
