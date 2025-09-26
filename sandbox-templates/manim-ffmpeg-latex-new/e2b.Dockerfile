@@ -6,3 +6,6 @@ RUN apt-get update && apt-get install -y ffmpeg latexmk dvisvgm texlive-latex-ba
 
 RUN which latex
 RUN latex --version
+
+ENV MANIM_TEX_COMPILER=pdflatex
+RUN ln -sf $(which pdflatex) /usr/bin/latex

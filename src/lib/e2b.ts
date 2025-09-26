@@ -12,7 +12,7 @@ export async function renderManimVideo({
   let sandbox: Sandbox | null = null;
 
   try {
-    sandbox = await Sandbox.create("manim-ffmpeg-latex-new-full", {});
+    sandbox = await Sandbox.create("manim-ffmpeg-latex-new-full");
     console.log("E2B sandbox created successfully");
 
     const scriptPath = `/home/user/script.py`;
@@ -22,6 +22,17 @@ export async function renderManimVideo({
     // Write Manim script
     await sandbox.files.write(scriptPath, script);
     console.log("Manim script written to sandbox");
+
+    const checkLatex = await sandbox.commands.run(`latex --version`, {
+      onStdout: (d) => console.log(d),
+      onStderr: (d) => console.error(d),
+    });
+
+    if (checkLatex.exitCode !== 0) {
+      throw new Error(
+        `Latex failed: ${checkLatex.exitCode}\n${checkLatex.stderr}`
+      );
+    }
 
     // Run manim
     const proc = await sandbox.commands.run(
