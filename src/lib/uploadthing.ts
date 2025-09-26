@@ -14,7 +14,7 @@ export async function uploadVideo({
   userId,
 }: UploadRequest): Promise<string> {
   try {
-    console.log(`Uploading video from path: ${videoPath}`);
+    // console.log(`Uploading video from path: ${videoPath}`);
 
     // Check if videoPath is a base64 data URL
     if (videoPath.startsWith("data:video/mp4;base64,")) {

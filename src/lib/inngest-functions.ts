@@ -35,7 +35,7 @@ export const generateVideo = inngest.createFunction(
 
       // Update job store on success
       if (jobId) {
-        jobStore.setReady(jobId, videoUrl);
+        await jobStore.setReady(jobId, videoUrl);
       }
 
       // Return the final result
@@ -51,7 +51,7 @@ export const generateVideo = inngest.createFunction(
     } catch (err: any) {
       console.error("Error in generateVideo function:", err);
       if (jobId) {
-        jobStore.setError(jobId, err?.message ?? "Unknown error");
+        await jobStore.setError(jobId, err?.message ?? "Unknown error");
       }
       throw err;
     }

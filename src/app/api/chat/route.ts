@@ -55,8 +55,8 @@ export async function POST(req: Request) {
         execute: async ({ description }) => {
           console.log("Starting video generation for:", description);
 
-          // Create a job in the in-memory job store
-          const job = jobStore.create(description);
+          // Create a job in the job store (KV in prod, memory in dev)
+          const job = await jobStore.create(description);
 
           // Dispatch background job to Inngest, including jobId for status updates
           await inngest.send({
