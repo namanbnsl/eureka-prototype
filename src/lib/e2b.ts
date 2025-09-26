@@ -1,6 +1,4 @@
 import { Sandbox } from "@e2b/code-interpreter";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 
 export interface RenderRequest {
   script: string;
@@ -71,18 +69,11 @@ export async function renderManimVideo({
       );
     }
     const base64 = (base64Result.stdout || "").trim();
-    const buffer = Buffer.from(base64, "base64");
-
-    // Ensure local tmp dir exists
-    const outDir = path.join(process.cwd(), "tmp");
-    await mkdir(outDir, { recursive: true });
-
-    // Save locally for UploadThing
-    const localPath = path.join(outDir, `manim_video_${Date.now()}.mp4`);
-    await writeFile(localPath, buffer);
-    console.log(`Saved validated video: ${localPath} (${buffer.length} bytes)`);
-
-    return localPath;
+    const dataUrl = `data:video/mp4;base64,${base64}`;
+    console.log(
+      `Prepared base64 data URL for upload (length: ${base64.length} chars)`
+    );
+    return dataUrl;
   } catch (err: any) {
     console.error("E2B render error:", err);
     throw new Error(`Failed to render Manim video: ${err.message}`);

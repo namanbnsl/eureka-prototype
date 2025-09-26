@@ -25,16 +25,10 @@ export const generateVideo = inngest.createFunction(
 
       console.log("Generated Manim script", { scriptLength: script.length });
 
-      // Step 2: Render script to MP4
-      const videoPath = await step.run("render-manim-video", async () => {
-        return await renderManimVideo({ script, prompt });
-      });
-
-      console.log("Rendered video to path:", videoPath);
-
-      // Step 3: Upload video to storage
-      const videoUrl = await step.run("upload-video", async () => {
-        return await uploadVideo({ videoPath, userId });
+      // Step 2 & 3 combined: Render and upload within a single step to avoid persisting large payloads
+      const videoUrl = await step.run("render-and-upload-video", async () => {
+        const dataUrlOrPath = await renderManimVideo({ script, prompt });
+        return await uploadVideo({ videoPath: dataUrlOrPath, userId });
       });
 
       console.log("Video uploaded successfully:", videoUrl);
