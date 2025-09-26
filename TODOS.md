@@ -1,5 +1,0 @@
-- [ ] Calculator, Reasoning traces, Search
-- [ ] Web Views
-- [ ] Graphs
-- [ ] Manim Videos
-- [ ] Multi-lang support
