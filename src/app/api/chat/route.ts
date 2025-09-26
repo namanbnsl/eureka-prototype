@@ -27,7 +27,6 @@ export async function POST(req: Request) {
     system: SYSTEM_PROMPT,
     messages: convertToModelMessages(messages),
     tools: {
-      // Define a tool that runs code in a sandbox
       execute_python: tool({
         description:
           "Execute python code in a Jupyter notebook cell and return result",
@@ -43,7 +42,6 @@ export async function POST(req: Request) {
           return { text, results, logs, error };
         },
       }),
-      // Define a tool for generating Manim animation videos
       generate_video: tool({
         description:
           "Generate a Manim animation video based on the user's description. Use this when users ask for animations, drawings, graphics, or video creation.",
@@ -62,22 +60,18 @@ export async function POST(req: Request) {
             name: "video/generate.request",
             data: {
               prompt: description,
-              userId: "anonymous", // You can replace this with actual user ID
+              userId: "anonymous",
               chatId: Date.now().toString(), // Generate a chat ID
             },
           });
 
           return {
             status: "generating",
-            message:
-              "🎬 Generating your video animation... This may take a few minutes. The video will be displayed once ready.",
             description,
-            timestamp: new Date().toISOString(),
           };
         },
       }),
     },
-    stopWhen: stepCountIs(5),
   });
 
   return result.toUIMessageStreamResponse({

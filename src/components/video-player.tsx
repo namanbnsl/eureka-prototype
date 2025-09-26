@@ -1,41 +1,17 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useState } from "react";
 
 interface VideoPlayerProps {
-  src: string;
-  onLoad?: () => void;
-  onError?: (error: Error) => void;
+  src?: string;
+  status: "generating" | "ready";
+  description: string;
 }
 
-export function VideoPlayer({ src, onLoad, onError }: VideoPlayerProps) {
+export function VideoPlayer({ src }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handleLoad = () => {
-      setIsLoading(false);
-      onLoad?.();
-    };
-
-    const handleError = (e: Event) => {
-      setIsLoading(false);
-      setError("Failed to load video");
-      onError?.(new Error("Video loading failed"));
-    };
-
-    video.addEventListener("loadeddata", handleLoad);
-    video.addEventListener("error", handleError);
-
-    return () => {
-      video.removeEventListener("loadeddata", handleLoad);
-      video.removeEventListener("error", handleError);
-    };
-  }, [src, onLoad, onError]);
 
   if (error) {
     return (
@@ -52,26 +28,33 @@ export function VideoPlayer({ src, onLoad, onError }: VideoPlayerProps) {
   }
 
   return (
-    <div className="relative bg-black rounded-lg overflow-hidden">
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 text-white">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-            <p className="mt-2">Loading video...</p>
+    <div
+      className={"w-full rounded-lg border border-border bg-card text-card-foreground p-6 flex items-center justify-center"}
+      style={{ aspectRatio: "16 / 9" }}
+      aria-busy="true"
+      aria-label="Video container generating"
+    >
+      <div className="mx-auto max-w-md text-center space-y-4">
+        <h2 className="text-balance text-lg font-medium">Video generating. Please wait</h2>
+        <p className="text-sm text-muted-foreground">This may take a moment.</p>
+
+        {/* Loading bar (indeterminate) */}
+        <div className="mt-4">
+          <div
+            className="h-2 w-full overflow-hidden rounded bg-muted"
+            role="progressbar"
+            aria-label="Generating video"
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div className="h-full w-1/3 rounded bg-primary animate-pulse" />
           </div>
         </div>
-      )}
-      <video
-        ref={videoRef}
-        className="w-full h-auto"
-        controls
-        preload="metadata"
-      >
-        <source src={src} type="video/mp4" />
-        <p className="p-4 text-white bg-gray-900">
-          Your browser doesn't support the video tag.
+
+        {/* Screen reader live status */}
+        <p className="sr-only" aria-live="polite" role="status">
+          Video generating. Please wait
         </p>
-      </video>
-    </div>
-  );
+      </div>
+    </div>);
 }

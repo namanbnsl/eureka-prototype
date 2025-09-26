@@ -84,9 +84,8 @@ export default function ChatPage() {
                           <Response
                             key={`${message.id}-${i}`}
                             className={`
-        max-w-none text-base leading-relaxed break-words ${
-          message.role == "assistant" ? "p-4" : ""
-        } rounded-lg
+        max-w-none text-base leading-relaxed break-words ${message.role == "assistant" ? "p-4" : ""
+                              } rounded-lg
 
         /* Direct element styling */
         [&>h1]:mt-6 [&>h1]:mb-4 [&>h1]:font-bold [&>h1]:text-xl
@@ -146,40 +145,58 @@ export default function ChatPage() {
                         );
                       }
                       case "tool-generate_video": {
-                        const result = part.result;
-                        if (result) {
-                          // Check if this tool invocation has a completed video
-                          const videoUrl = result.videoUrl;
-                          if (videoUrl) {
+                        const toolPart = part
+                        switch (toolPart.state) {
+                          case 'input-available':
+                            return <div key={i}>Loading video...</div>;
+                          case 'output-available':
                             return (
-                              <div key={`${message.id}-${i}`} className="p-4">
-                                <div className="mb-4">
-                                  <h3 className="text-lg font-semibold mb-2">
-                                    Generated Video
-                                  </h3>
-                                  <VideoPlayer src={videoUrl} />
-                                </div>
+                              <div key={i}>
+                                <VideoPlayer {...toolPart.output} />
                               </div>
                             );
-                          }
-
-                          // Still generating
-                          return (
-                            <div key={`${message.id}-${i}`} className="p-4">
-                              <div className="flex items-center space-x-2 mb-4">
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                                <span className="text-lg">
-                                  {result.message}
-                                </span>
-                              </div>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Generation may take a few minutes...
-                              </p>
-                            </div>
-                          );
+                          case 'output-error':
+                            return <div key={i}>Error: {toolPart.errorText}</div>;
+                          default:
+                            return null;
                         }
-                        return null;
                       }
+
+                      // case "tool-generate_video": {
+                      //   const result = part.result;
+                      //   if (result) {
+                      //     // Check if this tool invocation has a completed video
+                      //     const videoUrl = result.videoUrl;
+                      //     if (videoUrl) {
+                      //       return (
+                      //         <div key={`${message.id}-${i}`} className="p-4">
+                      //           <div className="mb-4">
+                      //             <h3 className="text-lg font-semibold mb-2">
+                      //               Generated Video
+                      //             </h3>
+                      //             <VideoPlayer src={videoUrl} />
+                      //           </div>
+                      //         </div>
+                      //       );
+                      //     }
+
+                      //     // Still generating
+                      //     return (
+                      //       <div key={`${message.id}-${i}`} className="p-4">
+                      //         <div className="flex items-center space-x-2 mb-4">
+                      //           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                      //           <span className="text-lg">
+                      //             {result.message}
+                      //           </span>
+                      //         </div>
+                      //         <p className="text-sm text-gray-600 dark:text-gray-400">
+                      //           Generation may take a few minutes...
+                      //         </p>
+                      //       </div>
+                      //     );
+                      //   }
+                      // return null;
+                      // }
                       default:
                         return null;
                     }
@@ -253,9 +270,8 @@ function formatExecutePythonOutput(output: unknown): string {
   // Show error prominently if present
   if (error) {
     try {
-      return `Error:\n\n\`\`\`\n${
-        typeof error === "string" ? error : JSON.stringify(error, null, 2)
-      }\n\`\`\``;
+      return `Error:\n\n\`\`\`\n${typeof error === "string" ? error : JSON.stringify(error, null, 2)
+        }\n\`\`\``;
     } catch {
       return `Error: ${String(error)}`;
     }
@@ -282,9 +298,9 @@ function formatExecutePythonOutput(output: unknown): string {
     try {
       sections.push(
         "Results:\n\n" +
-          "```json\n" +
-          JSON.stringify(results, null, 2) +
-          "\n```"
+        "```json\n" +
+        JSON.stringify(results, null, 2) +
+        "\n```"
       );
     } catch {
       sections.push("Results:\n\n" + String(results));
