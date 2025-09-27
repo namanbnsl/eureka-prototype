@@ -13,7 +13,7 @@ export async function renderManimVideo({
 
   try {
     sandbox = await Sandbox.create("manim-ffmpeg-latex-new-full", {
-      timeoutMs: 600000,
+      timeoutMs: 0,
     });
     console.log("E2B sandbox created successfully");
 
