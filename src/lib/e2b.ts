@@ -12,7 +12,7 @@ export async function renderManimVideo({
   let sandbox: Sandbox | null = null;
 
   try {
-    sandbox = await Sandbox.create("manim-ffmpeg-latex-new-full", {
+    sandbox = await Sandbox.create("manim-ffmpeg-latex-voiceover", {
       timeoutMs: 0,
     });
     console.log("E2B sandbox created successfully");
@@ -74,8 +74,7 @@ export async function renderManimVideo({
     const base64Result = await sandbox.commands.run(`base64 -w 0 ${videoPath}`);
     if (base64Result.exitCode !== 0 || !base64Result.stdout) {
       throw new Error(
-        `Failed to base64-encode video in sandbox: ${
-          base64Result.stderr || "no stdout"
+        `Failed to base64-encode video in sandbox: ${base64Result.stderr || "no stdout"
         }`
       );
     }

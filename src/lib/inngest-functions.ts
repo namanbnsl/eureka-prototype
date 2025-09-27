@@ -1,5 +1,5 @@
 import { inngest } from "./inngest";
-import { generateManimScript } from "./gemini";
+import { generateManimScript, generateVoiceoverScript } from "./gemini";
 import { renderManimVideo } from "./e2b";
 import { uploadVideo } from "./uploadthing";
 import { jobStore } from "./job-store";
@@ -18,14 +18,26 @@ export const generateVideo = inngest.createFunction(
     console.log(`Starting video generation for prompt: "${prompt}"`);
 
     try {
-      // Step 1: Generate Manim Python script
+      // Step 1: Generate voiceover narration
+      const voiceoverScript = await step.run(
+        "generate-voiceover-script",
+        async () => {
+          return await generateVoiceoverScript({ prompt });
+        }
+      );
+
+      console.log("Generated voiceover script", {
+        length: voiceoverScript.length,
+      });
+
+      // Step 2: Generate Manim Python script with voiceover
       const script = await step.run("generate-manim-script", async () => {
-        return await generateManimScript({ prompt });
+        return await generateManimScript({ prompt, voiceoverScript });
       });
 
       console.log("Generated Manim script", { scriptLength: script.length });
 
-      // Step 2 & 3 combined: Render and upload within a single step to avoid persisting large payloads
+      // Step 3 & 4 combined: Render and upload within a single step to avoid persisting large payloads
       const videoUrl = await step.run("render-and-upload-video", async () => {
         const dataUrlOrPath = await renderManimVideo({ script, prompt });
         return await uploadVideo({ videoPath: dataUrlOrPath, userId });
